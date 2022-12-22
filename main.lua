@@ -43,6 +43,7 @@ function love.load()
     ball = Ball(VIRTUAL_WIDTH / 2 - BALL_WIDTH / 2, VIRTUAL_HEIGHT / 2 - BALL_HEIGHT / 2, BALL_WIDTH, BALL_HEIGHT)
 
     gameState = 'start'
+    servingPlayer = 1
 
 end
 
@@ -70,6 +71,7 @@ function love.update(dt)
         collides1 = ball:collides(player1)
         collides2 = ball:collides(player2)
 
+        -- paddle hit the ball
         if collides1 or collides2 then
             ball.dx = -ball.dx * 1.03
             ball.x = collides1 and player1.x + PADDLE_WIDTH or player2.x - BALL_WIDTH
@@ -86,6 +88,19 @@ function love.update(dt)
             ball.dy = -ball.dy
         end
 
+        -- score
+        if ball.x - BALL_WIDTH < 0 then
+            servingPlayer = 1
+            player2Score = player2Score + 1
+            ball:reset()
+            gameState = 'serve'
+        elseif ball.x > VIRTUAL_WIDTH then
+            servingPlayer = 2
+            player1Score = player1Score + 1
+            ball:reset()
+            gameState = 'serve'
+        end
+
         ball:update(dt)
     end
 
@@ -97,12 +112,12 @@ function love.keypressed(key)
     if key == 'escape' then
         love.event.quit()
     elseif key == 'enter' or key == 'return' then
-        if gameState == 'start' then
+        if gameState == 'start' or gameState == 'serve' then
             gameState = 'play'
-        else
-            gameState = 'start'
-            ball:reset()
         end
+    elseif key == 'return' then
+        gameState = 'start'
+        ball:reset()
     end
 
 end
@@ -115,7 +130,10 @@ function love.draw()
 
     -- Hello World text
     love.graphics.setFont(smallFont)
-    love.graphics.printf('Hello World! ' .. gameState, 0, 20, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf('PONG ' .. gameState, 0, 10, VIRTUAL_WIDTH, 'center')
+    if gameState == 'serve' or gameState == 'start' then
+        love.graphics.printf('Player ' .. servingPlayer .. ' serves', 0, 20, VIRTUAL_WIDTH, 'center')
+    end
 
     -- score test
     love.graphics.setFont(scoreFont)
