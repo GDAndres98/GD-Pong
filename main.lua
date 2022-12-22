@@ -28,6 +28,12 @@ function love.load()
     smallFont = love.graphics.newFont('font.ttf', 8)
     scoreFont = love.graphics.newFont('font.ttf', 32)
 
+    sounds = {
+        ['paddle_hit'] = love.audio.newSource('sounds/paddle_hit.wav', 'static'),
+        ['score'] = love.audio.newSource('sounds/score.wav', 'static'),
+        ['wall_hit'] = love.audio.newSource('sounds/wall_hit.wav', 'static')
+    }
+
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
         fullscreen = false,
         resizable = false,
@@ -75,6 +81,7 @@ function love.update(dt)
 
         -- paddle hit the ball
         if collides1 or collides2 then
+            sounds['paddle_hit']:play()
             ball.dx = -ball.dx * 1.03
             ball.x = collides1 and player1.x + PADDLE_WIDTH or player2.x - BALL_WIDTH
 
@@ -83,20 +90,24 @@ function love.update(dt)
         end
 
         if ball.y <= 0 then
+            sounds['wall_hit']:play()
             ball.y = 0
             ball.dy = -ball.dy
         elseif ball.y >= VIRTUAL_HEIGHT - BALL_HEIGHT then
+            sounds['wall_hit']:play()
             ball.y = VIRTUAL_HEIGHT - BALL_HEIGHT
             ball.dy = -ball.dy
         end
 
         -- score
         if ball.x - BALL_WIDTH < 0 then
+            sounds['score']:play()
             servingPlayer = 1
             player2Score = player2Score + 1
             ball:reset()
             gameState = 'serve'
         elseif ball.x > VIRTUAL_WIDTH then
+            sounds['score']:play()
             servingPlayer = 2
             player1Score = player1Score + 1
             ball:reset()
@@ -147,7 +158,7 @@ function love.draw()
     love.graphics.printf('PONG!', 0, 10, VIRTUAL_WIDTH, 'center')
     if gameState == 'serve' or gameState == 'start' then
         love.graphics.printf('Player ' .. tostring(servingPlayer) .. ' serves', 0, 20, VIRTUAL_WIDTH, 'center')
-    elseif gameState=='done' then
+    elseif gameState == 'done' then
         love.graphics.printf('GAME OVER', 0, 20, VIRTUAL_WIDTH, 'center')
         love.graphics.setFont(scoreFont)
         love.graphics.printf('PLAYER ' .. tostring(winningPlayer) .. ' wins!', 0, 50, VIRTUAL_WIDTH, 'center')
