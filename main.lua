@@ -17,6 +17,8 @@ PADDLE_SPEED = 200
 BALL_WIDTH = 4
 BALL_HEIGHT = 4
 
+SCORE_LIMIT = 3
+
 function love.load()
     love.window.setTitle('Pong')
     love.graphics.setDefaultFilter('nearest', 'nearest')
@@ -34,6 +36,9 @@ function love.load()
 
     player1Score = 0
     player2Score = 0
+    gameState = 'start'
+    servingPlayer = 1
+    winningPlayer = 0
 
     -- paddles
     player1 = Paddle(10, 30, PADDLE_WIDTH, PADDLE_HEIGHT)
@@ -41,9 +46,6 @@ function love.load()
 
     -- ball
     ball = Ball(VIRTUAL_WIDTH / 2 - BALL_WIDTH / 2, VIRTUAL_HEIGHT / 2 - BALL_HEIGHT / 2, BALL_WIDTH, BALL_HEIGHT)
-
-    gameState = 'start'
-    servingPlayer = 1
 
 end
 
@@ -101,7 +103,16 @@ function love.update(dt)
             gameState = 'serve'
         end
 
-        ball:update(dt)
+        if player1Score == SCORE_LIMIT then
+            winningPlayer = 1
+            gameState = 'done'
+        elseif player2Score == SCORE_LIMIT then
+            winningPlayer = 2
+            gameState = 'done'
+        else
+            ball:update(dt)
+        end
+
     end
 
     player1:update(dt)
@@ -114,6 +125,9 @@ function love.keypressed(key)
     elseif key == 'enter' or key == 'return' then
         if gameState == 'start' or gameState == 'serve' then
             gameState = 'play'
+        elseif gameState == 'done' then
+            gameState = 'start'
+            resetGame()
         end
     elseif key == 'return' then
         gameState = 'start'
@@ -130,9 +144,13 @@ function love.draw()
 
     -- Hello World text
     love.graphics.setFont(smallFont)
-    love.graphics.printf('PONG ' .. gameState, 0, 10, VIRTUAL_WIDTH, 'center')
+    love.graphics.printf('PONG!', 0, 10, VIRTUAL_WIDTH, 'center')
     if gameState == 'serve' or gameState == 'start' then
-        love.graphics.printf('Player ' .. servingPlayer .. ' serves', 0, 20, VIRTUAL_WIDTH, 'center')
+        love.graphics.printf('Player ' .. tostring(servingPlayer) .. ' serves', 0, 20, VIRTUAL_WIDTH, 'center')
+    elseif gameState=='done' then
+        love.graphics.printf('GAME OVER', 0, 20, VIRTUAL_WIDTH, 'center')
+        love.graphics.setFont(scoreFont)
+        love.graphics.printf('PLAYER ' .. tostring(winningPlayer) .. ' wins!', 0, 50, VIRTUAL_WIDTH, 'center')
     end
 
     -- score test
@@ -150,6 +168,14 @@ function love.draw()
     displayFPS()
 
     push:apply('end')
+end
+
+function resetGame()
+    player1Score = 0
+    player2Score = 0
+    gameState = 'start'
+    servingPlayer = winningPlayer == 1 and 2 or 1
+    ball:reset()
 end
 
 function displayFPS()

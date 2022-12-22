@@ -7,7 +7,7 @@ function Ball:init(x, y, width, height)
     self.height = height
 
     -- ball velocity
-    self.dx = math.random(2) == 1 and 100 or -100
+    self.dx = servingPlayer == 1 and -100 or 100
     self.dy = math.random(-50, 50) * 1.5
 
 end
