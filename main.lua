@@ -16,6 +16,7 @@ BALL_WIDTH = 4
 BALL_HEIGHT = 4
 
 function love.load()
+    love.window.setTitle('Pong')
     love.graphics.setDefaultFilter('nearest', 'nearest')
 
     math.randomseed(os.time())
@@ -106,5 +107,13 @@ function love.draw()
     -- ball
     ball:render()
 
+    displayFPS()
+
     push:apply('end')
+end
+
+function displayFPS()
+    love.graphics.setFont(smallFont)
+    love.graphics.setColor(0, 255 / 255, 0, 255 / 255)
+    love.graphics.print('FPS: ' .. tostring(love.timer.getFPS()))
 end
