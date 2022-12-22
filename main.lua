@@ -10,6 +10,8 @@ WINDOW_HEIGHT = 1080
 VIRTUAL_WIDTH = 432
 VIRTUAL_HEIGHT = 243
 
+PADDLE_WIDTH = 5
+PADDLE_HEIGHT = 20
 PADDLE_SPEED = 200
 
 BALL_WIDTH = 4
@@ -34,8 +36,8 @@ function love.load()
     player2Score = 0
 
     -- paddles
-    player1 = Paddle(10, 30, 5, 20)
-    player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, 5, 20)
+    player1 = Paddle(10, 30, PADDLE_WIDTH, PADDLE_HEIGHT)
+    player2 = Paddle(VIRTUAL_WIDTH - 10, VIRTUAL_HEIGHT - 30, PADDLE_WIDTH, PADDLE_HEIGHT)
 
     -- ball
     ball = Ball(VIRTUAL_WIDTH / 2 - BALL_WIDTH / 2, VIRTUAL_HEIGHT / 2 - BALL_HEIGHT / 2, BALL_WIDTH, BALL_HEIGHT)
@@ -64,6 +66,26 @@ function love.update(dt)
     end
 
     if gameState == 'play' then
+
+        collides1 = ball:collides(player1)
+        collides2 = ball:collides(player2)
+
+        if collides1 or collides2 then
+            ball.dx = -ball.dx * 1.03
+            ball.x = collides1 and player1.x + PADDLE_WIDTH or player2.x - BALL_WIDTH
+
+            newDy = math.random(10, 150)
+            ball.dy = ball.dy < 0 and -newDy or newDy
+        end
+
+        if ball.y <= 0 then
+            ball.y = 0
+            ball.dy = -ball.dy
+        elseif ball.y >= VIRTUAL_HEIGHT - BALL_HEIGHT then
+            ball.y = VIRTUAL_HEIGHT - BALL_HEIGHT
+            ball.dy = -ball.dy
+        end
+
         ball:update(dt)
     end
 
